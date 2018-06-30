@@ -132,4 +132,50 @@ export class EETests {
 
     Expect(spy.onEvent).toHaveBeenCalled();
   }
+
+  @Test()
+  emitMissingEvent() {
+    const ee = new EE();
+
+    const spy = { onEvent() { /**/ } };
+    SpyOn(spy, 'onEvent');
+
+    ee.on('e', spy.onEvent);
+
+    ee.emit('x', 5);
+
+    Expect(spy.onEvent).not.toHaveBeenCalled();
+  }
+
+  @Test()
+  removeMissingEvent() {
+    const ee = new EE();
+
+    const spy = { onEvent() { /**/ } };
+    SpyOn(spy, 'onEvent');
+
+    ee.on('e', spy.onEvent);
+    ee.off('x');
+
+    ee.emit('e', 5);
+
+    Expect(spy.onEvent).toHaveBeenCalled();
+  }
+
+  @Test()
+  onceHandlerMulti() {
+    const ee = new EE();
+
+    const spy = { onEvent() { /**/ } };
+    SpyOn(spy, 'onEvent');
+
+    ee.once('e', spy.onEvent);
+    ee.once('e', spy.onEvent);
+
+    ee.on('e', spy.onEvent);
+
+    ee.emit('e', 5);
+
+    Expect(spy.onEvent).toHaveBeenCalled().exactly(2);
+  }
 }

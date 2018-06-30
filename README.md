@@ -1,4 +1,4 @@
-# ee
+# EE (Event Emitter)
 
 [![Build Status](https://travis-ci.org/soncodi/ee.svg?branch=master)](https://travis-ci.org/soncodi/ee)
 [![Coverage Status](https://coveralls.io/repos/github/soncodi/ee/badge.svg?branch=coverage)](https://coveralls.io/github/soncodi/ee?branch=coverage)
@@ -48,4 +48,4 @@ Detaches one instance of a given handler from the event emitter. If no handler i
 Fires the event synchronously, triggering any attached handlers with the given `arg`.
 
 #### `event(event: string, arg?: any): this`
-Fires the event asynchronously, triggering any attached handlers with the given `arg`. Used to allow attaching handlers later in the same event loop turn.
+Fires the event asynchronously, triggering any attached handlers with the given `arg`. Useful when attaching handlers later in the same event loop turn.
