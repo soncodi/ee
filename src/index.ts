@@ -23,13 +23,14 @@ export class EE<T = any> {
       this.subs[event] = [];
     }
 
-    const wrap: Cb<T> = (...args: any[]) => {
-      this.off(event, fn);
+    this.subs[event].push({
+      fn,
+      wrap: (arg?: T) => {
+        this.off(event, fn);
 
-      fn.apply(null, args);
-    };
-
-    this.subs[event].push({ fn, wrap });
+        fn.call(null, arg);
+      }
+    });
 
     return this;
   }
@@ -69,7 +70,6 @@ export class EE<T = any> {
   event(event: string, arg?: T) {
     // @ts-ignore
     setTimeout(() => this.emit(event, arg), 0);
-    // setImmediate(() => this.emit(arg));
 
     return this;
   }

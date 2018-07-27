@@ -35,17 +35,17 @@ ee.off('event', handler);
 
 ### Methods
 
-#### `on(event: string, fn: Function): this`
+#### `on(event: string, fn: (arg?: T) => void): this`
 Attaches an event handler to be called whenever the event fires.
 
-#### `once(event: string, fn: Function): this`
+#### `once(event: string, fn: (arg?: T) => void): this`
 Attaches a one-time handler which is unbound after it fires the first time.
 
-#### `off(event: string, fn?: Function): this`
+#### `off(event: string, fn?: (arg?: T) => void): this`
 Detaches one instance of a given handler from the event emitter. If no handler is provided, detaches all handlers.
 
-#### `emit(event: string, arg?: any): this`
+#### `emit(event: string, arg?: T): this`
 Fires the event synchronously, triggering any attached handlers with the given `arg`.
 
-#### `event(event: string, arg?: any): this`
+#### `event(event: string, arg?: T): this`
 Fires the event asynchronously, triggering any attached handlers with the given `arg`. Useful when attaching handlers later in the same event loop turn.
