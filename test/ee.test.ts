@@ -178,4 +178,28 @@ export class EETests {
 
     Expect(spy.onEvent).toHaveBeenCalled().exactly(2);
   }
+
+  @AsyncTest()
+  async preserveOrder() {
+    const ee = new EE<number>();
+
+    const results: string[] = [];
+
+    ee.on('e1', arg => results.push(`e1-${arg}`));
+    ee.once('e1', arg => results.push(`e1-${arg}`));
+    ee.on('e2', arg => results.push(`e2-${arg}`));
+    ee.on('e3', arg => results.push(`e3-${arg}`));
+
+    ee.emit('e1', 1); // caught twice
+    ee.emit('e2', 2);
+    ee.event('e3', 3); // async
+    ee.emit('e1', 4);
+    ee.emit('e2', 5);
+
+    Expect(results).toEqual(['e1-1', 'e1-1', 'e2-2', 'e1-4', 'e2-5']);
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    Expect(results).toEqual(['e1-1', 'e1-1', 'e2-2', 'e1-4', 'e2-5', 'e3-3']);
+  }
 }
