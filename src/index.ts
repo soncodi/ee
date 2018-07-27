@@ -68,7 +68,6 @@ export class EE<T = any> {
   }
 
   event(event: string, arg?: T) {
-    // @ts-ignore
     setTimeout(() => this.emit(event, arg), 0);
 
     return this;
