@@ -5,7 +5,7 @@ import { EE } from '../src';
 export class EETests {
   @Test()
   simpleEvent() {
-    const ee = new EE();
+    const ee = new EE<number>();
 
     const spy = { onEvent() { /**/ } };
     SpyOn(spy, 'onEvent');
@@ -28,7 +28,7 @@ export class EETests {
     ee.on('e', spy.onEvent);
     ee.on('e', spy.onEvent);
 
-    ee.emit('e', 5);
+    ee.emit('e');
 
     Expect(spy.onEvent).toHaveBeenCalled().exactly(2);
   }
@@ -43,7 +43,7 @@ export class EETests {
     ee.on('e', spy.onEvent);
     ee.off('e', spy.onEvent);
 
-    ee.emit('e', 5);
+    ee.emit('e');
 
     Expect(spy.onEvent).not.toHaveBeenCalled();
   }
@@ -59,7 +59,7 @@ export class EETests {
     ee.on('e', spy.onEvent);
     ee.off('e', spy.onEvent);
 
-    ee.emit('e', 5);
+    ee.emit('e');
 
     Expect(spy.onEvent).toHaveBeenCalled().exactly(1);
   }
@@ -73,8 +73,8 @@ export class EETests {
 
     ee.once('e', spy.onEvent);
 
-    ee.emit('e', 5);
-    ee.emit('e', 5);
+    ee.emit('e');
+    ee.emit('e');
 
     Expect(spy.onEvent).toHaveBeenCalled().exactly(1);
   }
@@ -93,7 +93,7 @@ export class EETests {
     ee.on('e', spy2.onEvent);
     ee.off('e', spy2.onEvent);
 
-    ee.emit('e', 5);
+    ee.emit('e');
 
     Expect(spy1.onEvent).toHaveBeenCalled().exactly(1);
     Expect(spy2.onEvent).not.toHaveBeenCalled();
@@ -110,7 +110,7 @@ export class EETests {
     ee.on('e', spy.onEvent);
     ee.off('e');
 
-    ee.emit('e', 5);
+    ee.emit('e');
 
     Expect(spy.onEvent).not.toHaveBeenCalled();
   }
@@ -124,7 +124,7 @@ export class EETests {
 
     ee.on('e', spy.onEvent);
 
-    ee.event('e', 5);
+    ee.event('e');
 
     Expect(spy.onEvent).not.toHaveBeenCalled();
 
@@ -142,7 +142,7 @@ export class EETests {
 
     ee.on('e', spy.onEvent);
 
-    ee.emit('x', 5);
+    ee.emit('x');
 
     Expect(spy.onEvent).not.toHaveBeenCalled();
   }
@@ -157,7 +157,7 @@ export class EETests {
     ee.on('e', spy.onEvent);
     ee.off('x');
 
-    ee.emit('e', 5);
+    ee.emit('e');
 
     Expect(spy.onEvent).toHaveBeenCalled();
   }
@@ -174,7 +174,7 @@ export class EETests {
 
     ee.on('e', spy.onEvent);
 
-    ee.emit('e', 5);
+    ee.emit('e');
 
     Expect(spy.onEvent).toHaveBeenCalled().exactly(2);
   }
@@ -201,5 +201,20 @@ export class EETests {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     Expect(results).toEqual(['e1-1', 'e1-1', 'e2-2', 'e1-4', 'e2-5', 'e3-3']);
+  }
+
+  @Test()
+  voidArg() {
+    const ee = new EE();
+
+    const results: void[] = [];
+
+    ee.on('e1', arg => results.push(arg));
+    ee.once('e1', arg => results.push(arg));
+
+    ee.emit('e1');
+    ee.event('e1');
+
+    Expect(results).toEqual([undefined, undefined]);
   }
 }
