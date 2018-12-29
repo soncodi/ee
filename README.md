@@ -13,16 +13,14 @@
 npm install @soncodi/ee --save
 ```
 
-### Usage
+### Usage (TypeScript)
 
-```js
+```typescript
 import { EE } from '@soncodi/ee';
-// or
-const { EE } = require('@soncodi/ee');
 
-const ee = new EE();
+const ee = new EE<number>();
 
-const handler = (param) => {
+const handler = (param: number) => {
   console.log(`event fired ${param}`);
 };
 
@@ -35,17 +33,17 @@ ee.off('event', handler);
 
 ### Methods
 
-#### `on(event: string, fn: (arg?: T) => void): this`
+#### `on(event: string, fn: (arg: T) => void): this`
 Attaches an event handler to be called whenever the event fires.
 
-#### `once(event: string, fn: (arg?: T) => void): this`
+#### `once(event: string, fn: (arg: T) => void): this`
 Attaches a one-time handler which is unbound after it fires the first time.
 
-#### `off(event: string, fn?: (arg?: T) => void): this`
+#### `off(event: string, fn?: (arg: T) => void): this`
 Detaches one instance of a given handler from the event emitter. If no handler is provided, detaches all handlers.
 
-#### `emit(event: string, arg?: T): this`
+#### `emit(event: string, arg: T): this`
 Fires the event synchronously, triggering any attached handlers with the given `arg`.
 
-#### `event(event: string, arg?: T): this`
+#### `event(event: string, arg: T): this`
 Fires the event asynchronously, triggering any attached handlers with the given `arg`. Useful when attaching handlers later in the same event loop turn.
