@@ -5,7 +5,7 @@ interface Subs<T> {
   [event: string]: { fn: Cb<T>; wrap?: Cb<T> }[];
 }
 
-export class EE<T = any> {
+export class EE<T = void> {
   private readonly subs: Subs<T> = {};
 
   on(event: string, fn: Cb<T>) {
@@ -25,7 +25,7 @@ export class EE<T = any> {
 
     this.subs[event].push({
       fn,
-      wrap: (arg?: T) => {
+      wrap: (arg: T) => {
         this.off(event, fn);
 
         fn.call(null, arg);
@@ -55,7 +55,7 @@ export class EE<T = any> {
     return this;
   }
 
-  emit(event: string, arg?: T) {
+  emit(event: string, arg: T) {
     if (!this.subs[event]) {
       this.subs[event] = [];
     }
@@ -67,7 +67,7 @@ export class EE<T = any> {
     return this;
   }
 
-  event(event: string, arg?: T) {
+  event(event: string, arg: T) {
     setTimeout(() => this.emit(event, arg), 0);
 
     return this;
