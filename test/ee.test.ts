@@ -217,4 +217,25 @@ export class EETests {
 
     Expect(results).toEqual([undefined, undefined]);
   }
+
+  @Test()
+  subclass() {
+    const Sub = class <T = any> extends EE<T> {
+      trigger(e: string, arg: T) {
+        return this.emit(e, arg);
+      }
+    };
+
+    const s = new Sub<number>();
+
+    const results: number[] = [];
+
+    s.on('a', arg => results.push(arg));
+
+    s.emit('a', 1);
+
+    s.trigger('a', 2).emit('a', 3);
+
+    Expect(results).toEqual([1, 2, 3]);
+  }
 }
