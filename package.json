@@ -1,7 +1,7 @@
 {
   "name": "@soncodi/ee",
-  "version": "2.0.2",
-  "description": "Tiny event emitter utility for Node.js and browsers.",
+  "version": "3.0.0",
+  "description": "Tiny, typed event emitter utility for Node.js and browsers.",
   "private": true,
   "author": "Alex Soncodi <asoncodi@gmail.com>",
   "license": "MIT",

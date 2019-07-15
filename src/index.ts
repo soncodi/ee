@@ -1,74 +1,63 @@
 
-export type Cb<T = any> = (t: T) => void;
+export type Cb<T> = (t: T) => void;
 
-interface Subs<T> {
-  [event: string]: { fn: Cb<T>; wrap?: Cb<T> }[];
-}
+export type OptArg<T> = T extends void ? [] : [T]; // allow parameterless emit
 
-export class EE<T = void> {
+// https://github.com/microsoft/TypeScript/issues/13573
+type Subs<T> = {
+  [E in keyof T]?: Cb<T[E]>[];
+};
+
+export class EE<T = { [str: string]: any }> {
   private readonly subs: Subs<T> = {};
 
-  on(event: string, fn: Cb<T>) {
-    if (!this.subs[event]) {
-      this.subs[event] = [];
-    }
+  private getSubs<E extends keyof T>(e: E) {
+    return (this.subs[e] || (this.subs[e] = [])) as Cb<T[E]>[];
+  }
 
-    this.subs[event].push({ fn });
+  on<E extends keyof T>(e: E, fn: Cb<T[E]>) {
+    this.getSubs(e).push(fn);
 
     return this;
   }
 
-  once(event: string, fn: Cb<T>) {
-    if (!this.subs[event]) {
-      this.subs[event] = [];
-    }
+  once<E extends keyof T>(e: E, fn: Cb<T[E]>) {
+    const wrap: Cb<T[E]> = (arg) => {
+      this.off(e, wrap);
 
-    this.subs[event].push({
-      fn,
-      wrap: (arg: T) => {
-        this.off(event, fn);
+      fn.call(null, arg);
+    };
 
-        fn.call(null, arg);
+    this.getSubs(e).push(wrap);
+
+    return this;
+  }
+
+  off<E extends keyof T>(e: E, fn?: Cb<T[E]>) {
+    const subs = this.getSubs(e);
+
+    if (fn) {
+      const idx = subs.indexOf(fn);
+
+      if (idx !== -1) {
+        subs.splice(idx, 1); // only remove one
       }
-    });
-
-    return this;
-  }
-
-  off(event: string, fn?: Cb<T>) {
-    if (!this.subs[event]) {
-      this.subs[event] = [];
-    }
-
-    if (!fn) {
-      this.subs[event].length = 0; // truncate
     }
     else {
-      for (let i = 0; i < this.subs[event].length; i++) {
-        if (this.subs[event][i].fn === fn) {
-          this.subs[event].splice(i, 1);
-          break; // only remove one
-        }
-      }
+      subs.length = 0; // truncate
     }
 
     return this;
   }
 
-  emit(event: string, arg: T) {
-    if (!this.subs[event]) {
-      this.subs[event] = [];
-    }
-
-    for (const s of this.subs[event]) {
-      (s.wrap || s.fn).call(null, arg);
-    }
+  emit<E extends keyof T>(e: E, ...arg: OptArg<T[E]>) {
+    this.getSubs(e).forEach(s => s.apply(null, arg as [T[E]]));
 
     return this;
   }
 
-  event(event: string, arg: T) {
-    setTimeout(() => this.emit(event, arg), 0);
+  event<E extends keyof T>(e: E, ...arg: OptArg<T[E]>) {
+    setTimeout(() => this.emit(e, ...arg), 0);
 
     return this;
   }

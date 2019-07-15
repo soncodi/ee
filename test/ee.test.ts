@@ -1,11 +1,24 @@
 import { TestFixture, Test, AsyncTest, SpyOn, Expect } from 'alsatian';
-import { EE } from '../src';
+import { EE, OptArg } from '../src';
+
+interface Events {
+  e: number;
+  f: string;
+  g: undefined;
+  h: [number, number];
+  i: { a: string; b: number };
+  1: string;
+}
+
+interface AnyEvents {
+  [e: string]: any;
+}
 
 @TestFixture()
 export class EETests {
   @Test()
   simpleEvent() {
-    const ee = new EE<number>();
+    const ee = new EE<Events>();
 
     const spy = { onEvent() { /**/ } };
     SpyOn(spy, 'onEvent');
@@ -20,7 +33,7 @@ export class EETests {
 
   @Test()
   sameHandlerMulti() {
-    const ee = new EE();
+    const ee = new EE<Events>();
 
     const spy = { onEvent() { /**/ } };
     SpyOn(spy, 'onEvent');
@@ -28,14 +41,15 @@ export class EETests {
     ee.on('e', spy.onEvent);
     ee.on('e', spy.onEvent);
 
-    ee.emit('e');
+    ee.emit('e', 1);
+    ee.emit('g');
 
     Expect(spy.onEvent).toHaveBeenCalled().exactly(2);
   }
 
   @Test()
   removeHandler() {
-    const ee = new EE();
+    const ee = new EE<Events>();
 
     const spy = { onEvent() { /**/ } };
     SpyOn(spy, 'onEvent');
@@ -43,14 +57,14 @@ export class EETests {
     ee.on('e', spy.onEvent);
     ee.off('e', spy.onEvent);
 
-    ee.emit('e');
+    ee.emit('e', 1);
 
     Expect(spy.onEvent).not.toHaveBeenCalled();
   }
 
   @Test()
   removeHandlerMulti() {
-    const ee = new EE();
+    const ee = new EE<Events>();
 
     const spy = { onEvent() { /**/ } };
     SpyOn(spy, 'onEvent');
@@ -59,29 +73,29 @@ export class EETests {
     ee.on('e', spy.onEvent);
     ee.off('e', spy.onEvent);
 
-    ee.emit('e');
+    ee.emit('e', 1);
 
     Expect(spy.onEvent).toHaveBeenCalled().exactly(1);
   }
 
   @Test()
   onceHandler() {
-    const ee = new EE();
+    const ee = new EE<Events>();
 
     const spy = { onEvent() { /**/ } };
     SpyOn(spy, 'onEvent');
 
     ee.once('e', spy.onEvent);
 
-    ee.emit('e');
-    ee.emit('e');
+    ee.emit('e', 1);
+    ee.emit('e', 1);
 
     Expect(spy.onEvent).toHaveBeenCalled().exactly(1);
   }
 
   @Test()
   removeSomeSubs() {
-    const ee = new EE();
+    const ee = new EE<Events>();
 
     const spy1 = { onEvent() { /**/ } };
     SpyOn(spy1, 'onEvent');
@@ -93,7 +107,7 @@ export class EETests {
     ee.on('e', spy2.onEvent);
     ee.off('e', spy2.onEvent);
 
-    ee.emit('e');
+    ee.emit('e', 1);
 
     Expect(spy1.onEvent).toHaveBeenCalled().exactly(1);
     Expect(spy2.onEvent).not.toHaveBeenCalled();
@@ -101,7 +115,7 @@ export class EETests {
 
   @Test()
   removeAllSubs() {
-    const ee = new EE();
+    const ee = new EE<Events>();
 
     const spy = { onEvent() { /**/ } };
     SpyOn(spy, 'onEvent');
@@ -110,21 +124,21 @@ export class EETests {
     ee.on('e', spy.onEvent);
     ee.off('e');
 
-    ee.emit('e');
+    ee.emit('e', 1);
 
     Expect(spy.onEvent).not.toHaveBeenCalled();
   }
 
   @AsyncTest()
   async asyncEvent() {
-    const ee = new EE();
+    const ee = new EE<Events>();
 
     const spy = { onEvent() { /**/ } };
     SpyOn(spy, 'onEvent');
 
     ee.on('e', spy.onEvent);
 
-    ee.event('e');
+    ee.event('e', 1);
 
     Expect(spy.onEvent).not.toHaveBeenCalled();
 
@@ -135,36 +149,36 @@ export class EETests {
 
   @Test()
   emitMissingEvent() {
-    const ee = new EE();
+    const ee = new EE<Events>();
 
     const spy = { onEvent() { /**/ } };
     SpyOn(spy, 'onEvent');
 
     ee.on('e', spy.onEvent);
 
-    ee.emit('x');
+    ee.emit('g');
 
     Expect(spy.onEvent).not.toHaveBeenCalled();
   }
 
   @Test()
   removeMissingEvent() {
-    const ee = new EE();
+    const ee = new EE<Events>();
 
     const spy = { onEvent() { /**/ } };
     SpyOn(spy, 'onEvent');
 
     ee.on('e', spy.onEvent);
-    ee.off('x');
+    ee.off('f');
 
-    ee.emit('e');
+    ee.emit('e', 1);
 
     Expect(spy.onEvent).toHaveBeenCalled();
   }
 
   @Test()
   onceHandlerMulti() {
-    const ee = new EE();
+    const ee = new EE<Events>();
 
     const spy = { onEvent() { /**/ } };
     SpyOn(spy, 'onEvent');
@@ -174,14 +188,14 @@ export class EETests {
 
     ee.on('e', spy.onEvent);
 
-    ee.emit('e');
+    ee.emit('e', 1);
 
     Expect(spy.onEvent).toHaveBeenCalled().exactly(2);
   }
 
   @AsyncTest()
   async preserveOrder() {
-    const ee = new EE<number>();
+    const ee = new EE();
 
     const results: string[] = [];
 
@@ -205,37 +219,100 @@ export class EETests {
 
   @Test()
   voidArg() {
-    const ee = new EE();
+    const ee = new EE<Events>();
 
-    const results: void[] = [];
+    const results: number[] = [];
 
-    ee.on('e1', arg => results.push(arg));
-    ee.once('e1', arg => results.push(arg));
+    ee.on('e', arg => results.push(arg));
+    ee.once('e', arg => results.push(arg));
 
-    ee.emit('e1');
-    ee.event('e1');
+    ee.emit('e', 1); // collected twice
+    ee.event('e', 2);
 
-    Expect(results).toEqual([undefined, undefined]);
+    Expect(results).toEqual([1, 1]);
   }
 
   @Test()
   subclass() {
-    const Sub = class <T = any> extends EE<T> {
-      trigger(e: string, arg: T) {
-        return this.emit(e, arg);
+    const Sub = class <T> extends EE<T> {
+      trigger<E extends keyof T>(e: E, ...arg: OptArg<T[E]>) {
+        return this.emit(e, ...arg);
       }
     };
 
-    const s = new Sub<number>();
+    const ee = new Sub<Events>();
 
-    const results: number[] = [];
+    const results: unknown[] = [];
 
-    s.on('a', arg => results.push(arg));
+    ee.on('e', arg => results.push(arg));
+    ee.on('f', arg => results.push(arg));
+    ee.on('g', arg => results.push(arg));
 
-    s.emit('a', 1);
+    ee.emit('e', 1);
 
-    s.trigger('a', 2).emit('a', 3);
+    ee.trigger('f', 'a').emit('g');
 
-    Expect(results).toEqual([1, 2, 3]);
+    Expect(results).toEqual([1, 'a', undefined]);
+  }
+
+  @Test()
+  untypedEmitter() {
+    const ee = new EE();
+
+    const results: unknown[] = [];
+
+    ee.on('e', arg => results.push(arg));
+    ee.on('f', arg => results.push(arg));
+    ee.on('g', arg => results.push(arg));
+    ee.on('h', arg => results.push(arg));
+    ee.on('i', arg => results.push(arg));
+    ee.on(1,   arg => results.push(arg));
+
+    ee.emit('e', 1);
+    ee.emit('f', 'a');
+    ee.emit('g');
+    ee.emit('h', [1, 2]);
+    ee.emit('i', { a: 'a', b: 1 });
+    ee.emit(1, 'a');
+
+    Expect(results).toEqual([1, 'a', undefined, [1, 2], { a: 'a', b: 1 }, 'a']);
+  }
+
+  @Test()
+  typedEmitter() {
+    const ee = new EE<Events>();
+
+    const results: unknown[] = [];
+
+    ee.on('e', arg => results.push(arg));
+    ee.on('f', arg => results.push(arg));
+    ee.on('g', arg => results.push(arg));
+    ee.on('h', arg => results.push(arg));
+    ee.on('i', arg => results.push(arg));
+    ee.on(1,   arg => results.push(arg));
+
+    ee.emit('e', 1);
+    ee.emit('f', 'a');
+    ee.emit('g');
+    ee.emit('h', [1, 2]);
+    ee.emit('i', { a: 'a', b: 1 });
+    ee.emit(1, 'a');
+
+    Expect(results).toEqual([1, 'a', undefined, [1, 2], { a: 'a', b: 1 }, 'a']);
+  }
+
+  @Test()
+  indexedEmitter() {
+    const ee = new EE<AnyEvents>();
+
+    const results: unknown[] = [];
+
+    ee.on('a', arg => results.push(arg));
+    ee.on('b', arg => results.push(arg));
+
+    ee.emit('a', 1);
+    ee.emit('b', 'a');
+
+    Expect(results).toEqual([1, 'a']);
   }
 }
