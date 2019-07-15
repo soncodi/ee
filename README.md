@@ -7,6 +7,8 @@
 
 **Tiny, typed event emitter utility for Node.js and browsers**
 
+_Need a single event and type, only? Check out [Signal](https://github.com/soncodi/signal) instead_
+
 ### Installation
 
 ```sh
