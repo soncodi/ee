@@ -5,7 +5,7 @@
 [![Dependency Status](https://david-dm.org/soncodi/ee/status.svg)](https://david-dm.org/soncodi/ee)
 [![npm version](https://badge.fury.io/js/%40soncodi%2Fee.svg)](https://badge.fury.io/js/%40soncodi%2Fee)
 
-**Tiny event emitter utility for Node.js and browsers**
+**Tiny, typed event emitter utility for Node.js and browsers**
 
 ### Installation
 
@@ -18,32 +18,44 @@ npm install @soncodi/ee --save
 ```typescript
 import { EE } from '@soncodi/ee';
 
-const ee = new EE<number>();
+// map event names to their callback param types
+interface Events {
+  a: number;
+  b: string;
+  c: undefined;
+}
 
-const handler = (param: number) => {
-  console.log(`event fired ${param}`);
-};
+const ee = new EE<Events>();
 
-ee.on('event', handler);
+const cb = (num: number) => console.log('A', num);
 
-ee.emit('event', 123);
+ee.on('a', cb);
+ee.on('b', str => console.log('B', str));
+ee.once('c', () => console.log('C'));
 
-ee.off('event', handler);
+ee.emit('a', 123);
+ee.emit('b', 'hello');
+ee.emit('c');
+
+ee.off('a', cb);
+
+ee.event('b', 123); // error
+ee.event('d', 123); // error
 ```
 
 ### Methods
 
-#### `on(event: string, fn: (arg: T) => void): this`
+#### `on(event, fn)`
 Attaches an event handler to be called whenever the event fires.
 
-#### `once(event: string, fn: (arg: T) => void): this`
+#### `once(event, fn)`
 Attaches a one-time handler which is unbound after it fires the first time.
 
-#### `off(event: string, fn?: (arg: T) => void): this`
+#### `off(event, fn?)`
 Detaches one instance of a given handler from the event emitter. If no handler is provided, detaches all handlers.
 
-#### `emit(event: string, arg: T): this`
+#### `emit(event, arg)`
 Fires the event synchronously, triggering any attached handlers with the given `arg`.
 
-#### `event(event: string, arg: T): this`
+#### `event(event, arg)`
 Fires the event asynchronously, triggering any attached handlers with the given `arg`. Useful when attaching handlers later in the same event loop turn.
