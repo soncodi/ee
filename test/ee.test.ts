@@ -1,4 +1,4 @@
-import { TestFixture, Test, AsyncTest, SpyOn, Expect } from 'alsatian';
+import { TestFixture, Test, SpyOn, Expect } from 'alsatian';
 import { EE, OptArg } from '../src';
 
 interface Events {
@@ -20,7 +20,7 @@ export class EETests {
   simpleEvent() {
     const ee = new EE<Events>();
 
-    const spy = { onEvent() { /**/ } };
+    const spy = { onEvent(_: number) { /**/ } };
     SpyOn(spy, 'onEvent');
 
     ee.on('e', spy.onEvent);
@@ -129,7 +129,7 @@ export class EETests {
     Expect(spy.onEvent).not.toHaveBeenCalled();
   }
 
-  @AsyncTest()
+  @Test()
   async asyncEvent() {
     const ee = new EE<Events>();
 
@@ -190,10 +190,10 @@ export class EETests {
 
     ee.emit('e', 1);
 
-    Expect(spy.onEvent).toHaveBeenCalled().exactly(2);
+    Expect(spy.onEvent).toHaveBeenCalled().exactly(3);
   }
 
-  @AsyncTest()
+  @Test()
   async preserveOrder() {
     const ee = new EE();
 
