@@ -5,7 +5,7 @@
 [![Dependency Status](https://david-dm.org/soncodi/ee/status.svg)](https://david-dm.org/soncodi/ee)
 [![npm version](https://badge.fury.io/js/%40soncodi%2Fee.svg)](https://badge.fury.io/js/%40soncodi%2Fee)
 
-**Tiny, typed event emitter utility for Node.js and browsers**
+**Tiny, typed event emitter utility for Node.js and browsers. No dependencies.**
 
 _Need a single event and type, only? Check out [Signal](https://github.com/soncodi/signal) instead_
 
