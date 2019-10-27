@@ -315,4 +315,34 @@ export class EETests {
 
     Expect(results).toEqual([1, 'a']);
   }
+
+  @Test()
+  nestedHandler() {
+    const ee = new EE<Events>();
+
+    const results: number[] = [];
+
+    const cb1 = () => {
+      results.push(1);
+
+      ee.on('e', cb2);
+    };
+
+    const cb2 = () => {
+      ee.on('e', cb1);
+
+      results.push(2);
+    };
+
+    ee.on('e', cb1);
+    ee.once('e', cb2);
+
+    ee.emit('e', 0);
+
+    Expect(results).toEqual([1, 2]);
+
+    ee.emit('e', 0);
+
+    Expect(results).toEqual([1, 2, 1, 2, 1]);
+  }
 }

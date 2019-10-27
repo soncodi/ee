@@ -16,7 +16,7 @@ export class EE<T = { [str: string]: any }> {
   }
 
   on<E extends keyof T>(e: E, fn: Cb<T[E]>) {
-    this.getSubs(e).unshift(fn);
+    this.getSubs(e).push(fn);
 
     return this;
   }
@@ -28,7 +28,7 @@ export class EE<T = { [str: string]: any }> {
       fn.call(null, arg);
     };
 
-    this.getSubs(e).unshift(wrap);
+    this.getSubs(e).push(wrap);
 
     return this;
   }
@@ -53,9 +53,7 @@ export class EE<T = { [str: string]: any }> {
   emit<E extends keyof T>(e: E, ...arg: OptArg<T[E]>) {
     const subs = this.getSubs(e);
 
-    for (let i = subs.length - 1; i >= 0; i--) {
-      subs[i].apply(null, arg as [T[E]]);
-    }
+    subs.slice().forEach(s => s.apply(null, arg as [T[E]]));
 
     return this;
   }
